@@ -1,18 +1,18 @@
 <template>
-    <div class="page">
-        <p>{{ counter }}</p>
-        <button @click="counter += 1">
-            click!
-        </button>
-    </div>
+    <v-app>
+        <Header />
+        <v-main style="background-color: #FFFAFA;">
+
+            <router-view />
+        </v-main>
+    </v-app>
 </template>
 
 <script>
+import Header from "./Header.vue";
 export default {
-    data() {
-        return {
-            counter: 0,
-        }
+    components: {
+        Header,
     },
-}
+};
 </script>

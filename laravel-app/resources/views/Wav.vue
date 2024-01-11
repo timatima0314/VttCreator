@@ -11,7 +11,9 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
+import { saveAs } from "file-saver";
+
 export default {
     data: () => {
         return {
@@ -21,7 +23,7 @@ export default {
     },
 
     methods: {
-       async fileSelected(event) {
+        async fileSelected(event) {
             console.log(event.target.files[0]);
             this.fileInput = event.target.files[0];
             this.fileName = event.target.files[0].name;
@@ -34,23 +36,32 @@ export default {
 
             // Formデータ作成
             const formData = new FormData();
-            
+
             formData.append("file", this.fileInput);
             formData.append("name", this.fileName);
             console.log(await formData.getAll("name"));
             // POST送信
             await axios
-                .post("/upload", formData, config)
+                .get("/upload")
                 .then((res) => {
                     // テストのため
-                    console.log(res);
+                    // console.log(res);
+                    console.log(res.data);
                 })
                 .catch((err) => {
                     console.log(err);
                 });
         },
-        but() {
-            console.log(this.fileInput);
+        async but() {
+            await axios
+                .get("/upload", {
+                    responseType: "blob",
+                })
+                .then((res) => {
+                    console.log(res.data.type);
+                    const blob = new Blob([res.data], { type: res.data.type });
+                    saveAs(blob, "x.wav");
+                });
         },
     },
 };

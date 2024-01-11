@@ -13,6 +13,7 @@
         "vite-plugin-vuetify": "^2.0.1"
     },
     "dependencies": {
+        "file-saver": "^2.0.5",
         "vue-router": "^4.2.5"
     }
 }

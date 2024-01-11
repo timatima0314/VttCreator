@@ -17,4 +17,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::post('/upload', [WavController::class, 'upload']);
+Route::get('/upload', [WavController::class, 'upload']);

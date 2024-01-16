@@ -9,12 +9,15 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use ZanySoft\Zip\Zip;
 use Illuminate\Support\Facades\File;
+use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 
 class WavController extends Controller
 {
     public $content;
     public function upload(Request $request)
     {
+        Storage::deleteDirectory('public');
+
         // formDataからfileを取り出す
         $files =  $request->file;
         $filename = $files;
@@ -66,6 +69,6 @@ class WavController extends Controller
         $mimeType = 'audio/x-wav';
         $headers = [['Content-Type' => $mimeType]];
         // $DL_file = $filePaths[$index];
-        return response()->download($filPaths, "小学校に居る時分学校.wav", $headers);
+        return response()->download($filPaths, "audio.wav", $headers);
     }
 }

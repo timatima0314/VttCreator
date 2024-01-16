@@ -92,7 +92,7 @@ export default {
                 .then((res) => {
                     console.log(res.data.type);
                     const blob = new Blob([res.data], { type: res.data.type });
-                    saveAs(blob, "x.wav");
+                    saveAs(blob, this.downloadFile[index]);
                 })
                 .catch((err) => {
                     console.log(err);
@@ -101,9 +101,6 @@ export default {
     },
 };
 </script>
-.get("/upload", { responseType: "blob", }) .then((res) => {
-console.log(res.data.type); const blob = new Blob([res.data], { type:
-res.data.type }); saveAs(blob, "x.wav"); });
 
 <style scoped>
 .downloadList {

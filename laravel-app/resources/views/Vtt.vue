@@ -4,6 +4,7 @@
         <v-file-input
             style="width: 30rem"
             label="テキストファイルを選択してください"
+            type="file"
             @change="fileSelected"
         ></v-file-input>
         <dragFilesDrop
@@ -11,7 +12,47 @@
             dropAreaMessage="ファイルドロップ"
             :isAllowSameFileName="false"
             class="dropFileAreaApp"
+            style="margin: 0 auto"
         />
+        <div>
+            <div class="flex-box">
+                <video v-if="videoPath" controls class="flex-item">
+                    <source
+                        :src="`storage/video/${videoPath}`"
+                        type="video/mp4"
+                    />
+                </video>
+                <div class="flex-item" v-else>
+                    こちらに動画がアップロードされます。
+                </div>
+
+                <v-card class="flex-item" variant="tonal">
+                    <v-list density="compact">
+                        <v-list-subheader class="font-weight-black font-italic"
+                            >再生する音声ファイル</v-list-subheader
+                        >
+
+                        <v-list-item
+                            v-for="(item, i) in audioFiles"
+                            :key="i"
+                            :value="item"
+                        >
+                            <dev
+                                @click="demoPlay(item.file_name)"
+                                class="v-list-item-flex"
+                            >
+                                <v-list-item-title style="font-weight: bold"
+                                    >{{ item.file_name }}
+                                </v-list-item-title>
+                                <v-list-item-title
+                                    >{{ item.size }}
+                                </v-list-item-title>
+                            </dev>
+                        </v-list-item>
+                    </v-list>
+                </v-card>
+            </div>
+        </div>
     </v-container>
 </template>
 
@@ -32,14 +73,19 @@ export default {
             files: "",
             audio: "",
             audioFiles: [],
+            file: "",
+            videoPath: "",
         };
     },
 
     methods: {
+        aa() {
+            alert("akfja");
+        },
         async fileSelected(event) {
-            this.files = event.target.files[0];
+            this.file = event.target.files[0];
             this.fileName = event.target.files[0].name;
-            console.log(this.fileInput, this.fileName);
+            console.log(this.file, this.fileName);
             const config = {
                 headers: {
                     "content-type": "multipart/form-data",
@@ -49,7 +95,7 @@ export default {
             // Formデータ作成
             const formData = new FormData();
 
-            formData.append("file", this.fileInput);
+            formData.append("file", this.file);
             formData.append("name", this.fileName);
             console.log(await formData.getAll("name"));
             // POST送信
@@ -58,7 +104,7 @@ export default {
                 .then(async (res) => {
                     // テストのため
                     console.log(res, "res");
-                    await this.but();
+                    this.videoPath = res.data;
                 })
                 .catch((err) => {
                     console.log(err);
@@ -91,12 +137,15 @@ export default {
                 .then(async (res) => {
                     // テストのため
                     console.log(res.data);
-                    this.audio = res.data;
+                    this.audioFiles.push(res.data);
                 })
                 .catch((err) => {
                     console.log(err);
                 });
-            this.audioFiles.push(this.audio);
+        },
+        demoPlay(filename) {
+            const music = new Audio(`storage/${filename}`);
+            music.play();
         },
     },
 };
@@ -119,5 +168,17 @@ export default {
     width: 100%;
     height: 100%;
     line-height: 11;
+}
+.flex-box {
+    display: flex;
+    width: 100%;
+}
+.flex-item {
+    width: 50%;
+}
+.v-list-item-flex {
+    display: flex;
+    width: 50%;
+    justify-content: space-around;
 }
 </style>

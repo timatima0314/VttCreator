@@ -29,4 +29,6 @@ Route::get('/{extraUrl?}', function ($extraUrl = null) {
 Route::post('/wav/upload', [WavController::class, 'upload']);
 Route::get('/wav/download', [WavController::class, 'download']);
 Route::get('/dl/{index}', [WavController::class, 'dl']);
+Route::post('/vtt/upload', [VttController::class, 'upload']);
 Route::post('/vtt/uploads', [VttController::class, 'uploads']);
+

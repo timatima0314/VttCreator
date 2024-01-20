@@ -13,6 +13,28 @@ use Illuminate\Support\Facades\File;
 
 class VttController extends Controller
 {
+    public function upload(Request $request)
+    {
+        Storage::deleteDirectory('public/video');
+
+        // dd($request->all());
+        // formDataからfileを取り出す
+        // dd($files);
+        $files =  $request->file;
+        $filename = $files->getClientOriginalName();
+        // $content = File::get($files);
+        // dd($content);
+        // $fileName = $request->file->getClientOriginalName();
+        // $file = $request->file;
+        // dd($filename, $files);
+        Storage::put("public/video/$filename", $files);
+        $filePaths = Storage::files("public/video/$filename");
+        $videoPaths = substr($filePaths[0],13);
+        // dd($videoPaths);
+        return $videoPaths;
+        // $filesIn = File::get($files);
+    }
+
     public function uploads(Request $request)
     {
 
@@ -34,9 +56,7 @@ class VttController extends Controller
             'time' => $this->sToM($item->getDurationInSeconds())
         );
         // dd($info['time']);
-        $i = 0;
         $array = [
-            "id" => $i,
             "file_name" => $filename,
             "size" => $info['time']
 
@@ -56,4 +76,7 @@ class VttController extends Controller
         $hms = sprintf("%02d:%02d",  $minutes, $seconds);
         return $hms;
     }
+    // public function demoPlay($filename){
+    //     path('')
+    // }
 }

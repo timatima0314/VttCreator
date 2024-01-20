@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WavController;
+use App\Http\Controllers\VttController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,12 +14,19 @@ use App\Http\Controllers\WavController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+// home以外でリロード時404回避
+Route::get('/{extraUrl?}', function ($extraUrl = null) {
+    return view('welcome', [
+        'extraUrl' => $extraUrl
+    ]);
 });
-
-Route::post('/upload', [WavController::class, 'upload']);
-Route::get('/download', [WavController::class, 'download']);
+// Route::get('/{any}', static function () {
+//     return view('welcome');
+// })->where('any', '.*');
+Route::post('/wav/upload', [WavController::class, 'upload']);
+Route::get('/wav/download', [WavController::class, 'download']);
 Route::get('/dl/{index}', [WavController::class, 'dl']);
-
-
+Route::post('/vtt/uploads', [VttController::class, 'uploads']);

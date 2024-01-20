@@ -66,7 +66,7 @@ export default {
             console.log(await formData.getAll("name"));
             // POST送信
             await axios
-                .post("/upload", formData, config)
+                .post("/wav/upload", formData, config)
                 .then(async (res) => {
                     // テストのため
                     console.log(res, "res");
@@ -77,7 +77,7 @@ export default {
                 });
         },
         async but() {
-            await axios.get("/download").then((res) => {
+            await axios.get("/wav/download").then((res) => {
                 console.log(res.data);
                 this.downloadFile = res.data;
                 console.log(this.downloadFile);

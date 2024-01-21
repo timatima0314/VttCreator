@@ -16,7 +16,7 @@
         />
         <div>
             <div class="flex-box">
-                <video v-if="videoPath" controls class="flex-item">
+                <video v-if="videoPath" controls class="flex-item" id="video">
                     <source
                         :src="`storage/video/${videoPath}`"
                         type="video/mp4"
@@ -53,14 +53,55 @@
                 </v-card>
             </div>
         </div>
+        <div class="d-flex align-center flex-column">
+            <v-card width="500px">
+                <div id="time" class="countTimer">00:00.000</div>
+                <div class="timerButtons">
+                    <v-btn
+                        type="button"
+                        @click="timeStart"
+                        :disabled="startButtonDisabled"
+                        color="grey-darken-3"
+                        class="mr-2"
+                        >start</v-btn
+                    >
+                    <v-btn
+                        type="button"
+                        @click="timeStop"
+                        color="grey-darken-3"
+                        :disabled="stopButtonDisabled"
+                        class="mr-2"
+                        >stop</v-btn
+                    >
+                    <v-btn
+                        type="button"
+                        color="grey-lighten-1"
+                        @click="timeReset"
+                        >reset</v-btn
+                    >
+                </div>
+                <div class="d-flex align-center flex-column mb-6">
+
+                    <v-btn @click="continuousPlay" color="blue-grey-darken-1" :disabled="continuousPlayButtonDisabled">音声連続再生</v-btn>
+                </div>
+            </v-card>
+        </div>
     </v-container>
 </template>
 
 <script>
-import dragFilesDrop from "drag-files-drop";
+import dragFilesDrop, { f } from "drag-files-drop";
 
 //cssのインポートもしておきます。
 import "drag-files-drop/dist/drag-files-drop.css";
+let startTime;
+// 停止時間
+let stopTime = 0;
+// タイムアウトID
+let timeoutID;
+let m;
+let s;
+let ms;
 
 export default {
     components: {
@@ -75,13 +116,15 @@ export default {
             audioFiles: [],
             file: "",
             videoPath: "",
+            startButtonDisabled: false,
+            stopButtonDisabled: true,
+            resetButtonDisabled: true,
+            continuousPlayButtonDisabled:true,
+            index: 0,
         };
     },
 
     methods: {
-        aa() {
-            alert("akfja");
-        },
         async fileSelected(event) {
             this.file = event.target.files[0];
             this.fileName = event.target.files[0].name;
@@ -138,6 +181,7 @@ export default {
                     // テストのため
                     console.log(res.data);
                     this.audioFiles.push(res.data);
+                    this.continuousPlayButtonDisabled = false;
                 })
                 .catch((err) => {
                     console.log(err);
@@ -146,6 +190,51 @@ export default {
         demoPlay(filename) {
             const music = new Audio(`storage/${filename}`);
             music.play();
+        },
+        continuousPlay() {
+            const playFailName = this.audioFiles[this.index].file_name;
+            const music = new Audio(`storage/${playFailName}`);
+            music.play();
+            if (this.audioFiles.length - 1 == this.index)
+                return (this.index = 0);
+            this.index++;
+        },
+        displayTime() {
+            const currentTime = new Date(Date.now() - startTime + stopTime);
+            // const h = String(currentTime.getHours() - 1).padStart(2, "0");
+            m = String(currentTime.getMinutes()).padStart(2, "0");
+            s = String(currentTime.getSeconds()).padStart(2, "0");
+            ms = String(currentTime.getMilliseconds()).padStart(3, "0");
+            // document.getElementById("time")を記述せずともtidを取得する
+            time.textContent = `${m}:${s}.${ms}`;
+            console.log(currentTime);
+            timeoutID = setTimeout(this.displayTime, 10);
+        },
+        timeStart() {
+            this.startButtonDisabled = true;
+            this.stopButtonDisabled = false;
+
+            // stopButton.disabled = false;
+            // resetButton.disabled = true;
+            startTime = Date.now();
+            this.displayTime();
+            video.play();
+        },
+        timeStop() {
+            {
+                this.startButtonDisabled = false;
+                this.stopButtonDisabled = true;
+                // resetButton.disabled = false;
+                clearTimeout(timeoutID);
+                stopTime += Date.now() - startTime;
+                console.log(`${m}:${s}.${ms}`);
+                video.pause();
+            }
+        },
+        timeReset() {
+            time.textContent = "00:00.000";
+            stopTime = 0;
+            video.load();
         },
     },
 };
@@ -180,5 +269,17 @@ export default {
     display: flex;
     width: 50%;
     justify-content: space-around;
+}
+.filesDrop div:nth-child(n + 2) {
+    display: none;
+}
+.countTimer {
+    text-align: center;
+    font-size: 3rem;
+    margin: 1rem;
+}
+.timerButtons {
+    text-align: center;
+    margin-bottom: 1.5rem;
 }
 </style>

@@ -41,6 +41,8 @@ class VttController extends Controller
         // formDataからfileを取り出す
         $files =  $request->file;
         $filename = $files->getClientOriginalName();
+        $text = rtrim($filename,".wav");
+
         $content = File::get($files);
         // dd($content);
         Storage::put("public/$filename", $content);
@@ -58,7 +60,8 @@ class VttController extends Controller
         // dd($info['time']);
         $array = [
             "file_name" => $filename,
-            "size" => $info['time']
+            "size" => $item->getDurationInSeconds(),
+            "text" => $text
 
         ];
         // dd($array);

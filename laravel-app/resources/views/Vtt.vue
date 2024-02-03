@@ -55,7 +55,7 @@
         </div>
         <div class="d-flex align-center flex-column">
             <v-card width="500px">
-                <div id="time" class="countTimer">00:00.000</div>
+                <div id="time" class="countTimer">00:00:00.000</div>
                 <div class="timerButtons">
                     <v-btn
                         type="button"
@@ -81,17 +81,37 @@
                     >
                 </div>
                 <div class="d-flex align-center flex-column mb-6">
-
-                    <v-btn @click="continuousPlay" color="blue-grey-darken-1" :disabled="continuousPlayButtonDisabled">音声連続再生</v-btn>
+                    <v-btn
+                        @click="continuousPlay"
+                        color="blue-grey-darken-1"
+                        :disabled="continuousPlayButtonDisabled"
+                        >音声連続再生</v-btn
+                    >
                 </div>
             </v-card>
+        </div>
+        <v-btn @click="createVtt">VTT</v-btn>
+        <div v-if="vttDisplay">
+            <p>WEBVTT</p>
+            <br/>
+            <ul v-for="(item, i) in vttJson" :key="i">
+                <li style="list-style: none;">
+                    <p>{{ i }}</p>
+                    <p>
+                        {{ item.startTime }} --> {{ item.endTime }} 
+                    </p>
+                    <p>{{ item.text }}</p>
+                    <br/>
+                </li>
+            </ul>
+
         </div>
     </v-container>
 </template>
 
 <script>
 import dragFilesDrop, { f } from "drag-files-drop";
-
+import dayjs from "dayjs";
 //cssのインポートもしておきます。
 import "drag-files-drop/dist/drag-files-drop.css";
 let startTime;
@@ -99,10 +119,12 @@ let startTime;
 let stopTime = 0;
 // タイムアウトID
 let timeoutID;
+let h;
 let m;
 let s;
 let ms;
-
+const now = dayjs(); // 現在の日付情報を取得
+console.log(now.format());
 export default {
     components: {
         dragFilesDrop,
@@ -119,8 +141,11 @@ export default {
             startButtonDisabled: false,
             stopButtonDisabled: true,
             resetButtonDisabled: true,
-            continuousPlayButtonDisabled:true,
+            continuousPlayButtonDisabled: true,
             index: 0,
+            vttJson: [],
+            vtt:"",
+            vttDisplay:false
         };
     },
 
@@ -181,6 +206,7 @@ export default {
                     // テストのため
                     console.log(res.data);
                     this.audioFiles.push(res.data);
+                    this.vttJson.push(res.data);
                     this.continuousPlayButtonDisabled = false;
                 })
                 .catch((err) => {
@@ -192,22 +218,37 @@ export default {
             music.play();
         },
         continuousPlay() {
+            const dammyDate = "2019-01-10";
+            const addTime = this.audioFiles[this.index].size;
             const playFailName = this.audioFiles[this.index].file_name;
             const music = new Audio(`storage/${playFailName}`);
             music.play();
-            if (this.audioFiles.length - 1 == this.index)
-                return (this.index = 0);
-            this.index++;
+
+            let intTime = dayjs(`${dammyDate}${h}:${m}:${s}`)
+                .add(addTime, "s")
+                .format("YYYY-MM-DD HH:mm:ss");
+            console.log(intTime);
+            const res = intTime.slice(11, 19);
+            console.log(res);
+            this.vttJson[this.index].startTime = `${h}:${m}:${s}.${ms}`;
+            this.vttJson[this.index].endTime = `${res}.${ms}`;
+            if (this.audioFiles.length - 1 == this.index) {
+                this.index = 0;
+            } else {
+                this.index++;
+            }
+            console.log(`${h}:${m}:${s}.${ms}`);
         },
         displayTime() {
             const currentTime = new Date(Date.now() - startTime + stopTime);
             // const h = String(currentTime.getHours() - 1).padStart(2, "0");
+            h = String(currentTime.getHours() - 9).padStart(2, "0");
             m = String(currentTime.getMinutes()).padStart(2, "0");
             s = String(currentTime.getSeconds()).padStart(2, "0");
             ms = String(currentTime.getMilliseconds()).padStart(3, "0");
             // document.getElementById("time")を記述せずともtidを取得する
-            time.textContent = `${m}:${s}.${ms}`;
-            console.log(currentTime);
+            time.textContent = `${h}:${m}:${s}.${ms}`;
+            // console.log(currentTime);
             timeoutID = setTimeout(this.displayTime, 10);
         },
         timeStart() {
@@ -227,7 +268,7 @@ export default {
                 // resetButton.disabled = false;
                 clearTimeout(timeoutID);
                 stopTime += Date.now() - startTime;
-                console.log(`${m}:${s}.${ms}`);
+                console.log(`${h}:${m}:${s}.${ms}`);
                 video.pause();
             }
         },
@@ -235,6 +276,20 @@ export default {
             time.textContent = "00:00.000";
             stopTime = 0;
             video.load();
+        },
+        createVtt() {
+            this.vttDisplay=true;
+            let vttItem = `WEBVTT
+`;
+for (let b = 0; b < this.vttJson.length; b++) {
+vttItem = vttItem.concat(`
+${b}
+${this.vttJson[b].startTime} --> ${this.vttJson[b].endTime}
+${this.vttJson[b].text}
+`);
+            }
+            console.log(vttItem);
+            this.vtt = vttItem
         },
     },
 };

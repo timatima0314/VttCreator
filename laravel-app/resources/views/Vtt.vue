@@ -15,18 +15,34 @@
             style="margin: 0 auto"
         />
         <div>
-            <div class="flex-box">
-                <video v-if="videoPath" controls class="flex-item" id="video">
-                    <source
+            <div class="d-flex justify-space-between align-center mb-3">
+                <div style="width: 49%; min-height:20rem" >
+
+                    <video v-if="videoPath" controls style="width: 100%;" id="video">
+                        <source
                         :src="`storage/video/${videoPath}`"
                         type="video/mp4"
-                    />
-                </video>
-                <div class="flex-item" v-else>
-                    こちらに動画がアップロードされます。
+                        />
+                        <track
+                        id="jaTrack"
+                        :src="`storage/creates.vtt`"
+                        kind="subtitles"
+                        srclang="ja"
+                        label="テスト"
+                        default="default"
+                        />
+                        
+                    </video>
+                    <v-list v-else density="compact" style="height: 20rem;background-color: #ccc;border-radius: 0.3rem;">
+                        <v-list-subheader class="font-weight-black font-italic"
+                            >こちらに動画がアップロードされます</v-list-subheader
+                        >
+
+                    </v-list>
+
                 </div>
 
-                <v-card class="flex-item" variant="tonal">
+                <v-card class="flex-item" variant="tonal" min-height="20rem">
                     <v-list density="compact">
                         <v-list-subheader class="font-weight-black font-italic"
                             >再生する音声ファイル</v-list-subheader
@@ -53,8 +69,8 @@
                 </v-card>
             </div>
         </div>
-        <div class="d-flex align-center flex-column">
-            <v-card width="500px">
+        <div class="d-flex justify-center align-center mb-10">
+            <v-card width="49%">
                 <div id="time" class="countTimer">00:00:00.000</div>
                 <div class="timerButtons">
                     <v-btn
@@ -90,22 +106,38 @@
                 </div>
             </v-card>
         </div>
-        <v-btn @click="createVtt">VTT</v-btn>
-        <div v-if="vttDisplay">
-            <p>WEBVTT</p>
-            <br/>
-            <ul v-for="(item, i) in vttJson" :key="i">
-                <li style="list-style: none;">
-                    <p>{{ i }}</p>
-                    <p>
-                        {{ item.startTime }} --> {{ item.endTime }} 
-                    </p>
-                    <p>{{ item.text }}</p>
+            <div v-if="vttDisplay" style="width: 80%; margin: 0 auto;">
+            <v-card class="vttDisplay" variant="outlined" style="background-color: #fff;padding: 1rem;">
+                <div class="vttDisplayInner" >
+
+                    <p>WEBVTT</p>
                     <br/>
-                </li>
-            </ul>
+                    <ul v-for="(item, i) in vttJson" :key="i">
+                        <li style="list-style: none;">
+                            <p>{{ i }}</p>
+                            <p>
+                                {{ item.startTime }} --> {{ item.endTime }} 
+                            </p>
+                            <p>{{ item.text }}</p>
+                            <br/>
+                        </li>
+                    </ul>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                    <v-btn @click="outVtt" color="blue-grey-darken-2" style="margin-bottom: 1rem;">こちらのvttファイルを作成する場合ここをクリック</v-btn>
+                    <v-btn @click="outVttSub" color="red-lighten-5" height="3rem" style="font-size: 0.7rem;">ブラウザの保護機能でDLできない場合こちらを押してください。<br/>拡張子をvttに変換してご利用ください</v-btn>
+                </div>
+
+            </v-card>
 
         </div>
+        <div v-else style="width: 80%;min-height: 30rem; margin: 0 auto;">
+            <v-card class="vttDisplay font-weight-black font-italic" variant="outlined" style="background-color: #fff;padding: 1rem;">
+                こちらにVTTが出力されます。
+            </v-card>
+
+        </div>
+
     </v-container>
 </template>
 
@@ -238,6 +270,7 @@ export default {
                 this.index++;
             }
             console.log(`${h}:${m}:${s}.${ms}`);
+            this.vttDisplay = true;
         },
         displayTime() {
             const currentTime = new Date(Date.now() - startTime + stopTime);
@@ -291,6 +324,33 @@ ${this.vttJson[b].text}
             console.log(vttItem);
             this.vtt = vttItem
         },
+        outVtt(){
+            this.createVtt();
+            const blob = new Blob([this.vtt],{type:"text/vtt"});
+
+            const link = document.createElement('a');
+
+            link.href = URL.createObjectURL(blob);
+
+            link.download = 'create.vtt';
+
+            link.click();
+
+        },
+        outVttSub(){
+            this.createVtt();
+            const blob = new Blob([this.vtt],{type:"text/plain"});
+
+            const link = document.createElement('a');
+
+            link.href = URL.createObjectURL(blob);
+
+            link.download = 'create.txt';
+
+            link.click();
+
+        }
+
     },
 };
 </script>
@@ -336,5 +396,12 @@ ${this.vttJson[b].text}
 .timerButtons {
     text-align: center;
     margin-bottom: 1.5rem;
+}
+.vttDisplayInner{
+    background-color:rgb(226, 226, 226);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+
 }
 </style>

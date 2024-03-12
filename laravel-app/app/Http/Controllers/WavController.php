@@ -19,7 +19,7 @@ class WavController extends Controller
         Storage::deleteDirectory('public');
 
         // formDataからfileを取り出す
-        $files =  $request->file;
+        $files = $request->file;
         $filename = $files;
 
         // ファイルを配列に格納し、さらに変数に格納
